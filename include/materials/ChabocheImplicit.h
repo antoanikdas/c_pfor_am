@@ -74,6 +74,16 @@ protected:
 
   virtual std::vector<Real> convertSym33ToMandel6(const RankTwoTensor matrix);
 
+  virtual void insertVector6row(const std::vector<Real> & v,
+                                std::vector<std::vector<Real>> & J,
+                                const unsigned int row0,
+                                const unsigned int col0);
+
+  virtual void insertVector6column(const std::vector<Real> & v,
+                                   std::vector<std::vector<Real>> & J,
+                                   const unsigned int row0,
+                                   const unsigned int col0);
+
   // epsilon^p
   MaterialProperty<RankTwoTensor> & _plastic_strain;
   const MaterialProperty<RankTwoTensor> & _plastic_strain_old;

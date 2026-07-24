@@ -498,16 +498,16 @@ ChabocheImplicit::initMapVoigt()
 // used to build the full 13x13 Jacobian for the return mapping
 void
 ChabocheImplicit::insert66matrix(const std::vector<std::vector<Real>> & A,
-                           std::vector<std::vector<Real>> & J,
-                           unsigned int row0,
-                           unsigned int col0)
+                                 std::vector<std::vector<Real>> & J,
+                                 const unsigned int row0,
+                                 const unsigned int col0)
 {
   for (unsigned int i = 0; i < 6; ++i)
     for (unsigned int j = 0; j < 6; ++j)
       J[row0+i][col0+j] = A[i][j];
 }
 
-// Convert symmetric 3x3 stress tensor into 6x1 vector using Mandel notation
+// Convert symmetric 3x3 stress tensor into 6x1 vector using (Mandel?) notation
 std::vector<Real>
 ChabocheImplicit::convertSym33ToMandel6(const RankTwoTensor matrix)
 {
@@ -522,4 +522,26 @@ ChabocheImplicit::convertSym33ToMandel6(const RankTwoTensor matrix)
   v[5] = matrix(0,1);
 
   return v;
+}
+
+// Insert a 6x1 vector into a larger matrix at specified row
+void
+ChabocheImplicit::insertVector6row(const std::vector<Real> & v,
+                                   std::vector<std::vector<Real>> & J,
+                                   const unsigned int row0,
+                                   const unsigned int col0)
+{
+  for (unsigned int i = 0; i < 6; ++i)
+    J[row0][col0 + i] = v[i];
+}
+
+// Insert a 6x1 vector into a larger matrix at specified column
+void
+ChabocheImplicit::insertVector6column(const std::vector<Real> & v,
+                                      std::vector<std::vector<Real>> & J,
+                                      const unsigned int row0,
+                                      const unsigned int col0)
+{
+  for (unsigned int i = 0; i < 6; ++i)
+    J[row0 + i][col0] = v[i];
 }
