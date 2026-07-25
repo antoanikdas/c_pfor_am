@@ -241,6 +241,9 @@ ChabocheImplicit::returnMap(const Real eqvpstrain_old,
   for (auto & row : mat66_dresidual_backstress2_dbackstress1)
     row.resize(6);
 
+  // 6x1 vectors to fill the Jacobian
+  std::vector<Real> vec6_dresidual_delta_gamma_dX(6);
+
   // Initialize temporary backstress variables for the return mapping iterations
   _backstress1_iter = _backstress1[_qp];
   _backstress2_iter = _backstress2[_qp];
@@ -300,12 +303,18 @@ ChabocheImplicit::returnMap(const Real eqvpstrain_old,
     dresidual_backstress1_dbackstress2 = - (2.0 / 3.0) * _C1[_qp] * delta_gamma * dn_dbackstress2;
     dresidual_backstress2_dbackstress1 = - (2.0 / 3.0) * _C2[_qp] * delta_gamma * dn_dbackstress1;
 
+    // TO DO: convert symmetric tensors
+
     // build full Jacobian for return mapping
     J[0][0] = jacobian_delta_gamma;
     insert66matrix(mat66_jacobian_backstress1,J,1,1);
     insert66matrix(mat66_dresidual_backstress1_dbackstress2,J,1,7);
     insert66matrix(mat66_dresidual_backstress2_dbackstress1,J,7,1);
     insert66matrix(mat66_jacobian_backstress2,J,7,7);
+    insertVector6row(vec6_dresidual_delta_gamma_dX,J,0,1);
+    insertVector6row(vec6_dresidual_delta_gamma_dX,J,0,7);
+    insertVector6column(vec6_dresidual_delta_gamma_dX,J,1,0);
+    insertVector6column(vec6_dresidual_delta_gamma_dX,J,7,0);
 
     // Update backstresses with a Newton step
     _backstress1_iter -= jacobian_backstress1.inverse() * residual_backstress1;
