@@ -243,6 +243,8 @@ ChabocheImplicit::returnMap(const Real eqvpstrain_old,
 
   // 6x1 vectors to fill the Jacobian
   std::vector<Real> vec6_dresidual_delta_gamma_dX(6);
+  std::vector<Real> vec6_dresidual_backstress1_ddelta_gamma(6);
+  std::vector<Real> vec6_dresidual_backstress2_ddelta_gamma(6);
 
   // Initialize temporary backstress variables for the return mapping iterations
   _backstress1_iter = _backstress1[_qp];
@@ -303,7 +305,14 @@ ChabocheImplicit::returnMap(const Real eqvpstrain_old,
     dresidual_backstress1_dbackstress2 = - (2.0 / 3.0) * _C1[_qp] * delta_gamma * dn_dbackstress2;
     dresidual_backstress2_dbackstress1 = - (2.0 / 3.0) * _C2[_qp] * delta_gamma * dn_dbackstress1;
 
-    // TO DO: convert symmetric tensors
+    // convert symmetric tensors
+    mat66_jacobian_backstress1 = convertSym3333ToMandel66(jacobian_backstress1);
+    mat66_jacobian_backstress2 = convertSym3333ToMandel66(jacobian_backstress2);
+    mat66_dresidual_backstress1_dbackstress2 = convertSym3333ToMandel66(dresidual_backstress1_dbackstress2);
+    mat66_dresidual_backstress2_dbackstress1 = convertSym3333ToMandel66(dresidual_backstress2_dbackstress1);
+    vec6_dresidual_delta_gamma_dX = convertSym33ToMandel6(dresidual_delta_gamma_dX);
+    vec6_dresidual_backstress1_ddelta_gamma = convertSym33ToMandel6(dresidual_backstress1_ddelta_gamma);
+    vec6_dresidual_backstress2_ddelta_gamma = convertSym33ToMandel6(dresidual_backstress2_ddelta_gamma);
 
     // build full Jacobian for return mapping
     J[0][0] = jacobian_delta_gamma;
@@ -313,8 +322,8 @@ ChabocheImplicit::returnMap(const Real eqvpstrain_old,
     insert66matrix(mat66_jacobian_backstress2,J,7,7);
     insertVector6row(vec6_dresidual_delta_gamma_dX,J,0,1);
     insertVector6row(vec6_dresidual_delta_gamma_dX,J,0,7);
-    insertVector6column(vec6_dresidual_delta_gamma_dX,J,1,0);
-    insertVector6column(vec6_dresidual_delta_gamma_dX,J,7,0);
+    insertVector6column(vec6_dresidual_backstress1_ddelta_gamma,J,1,0);
+    insertVector6column(vec6_dresidual_backstress2_ddelta_gamma,J,7,0);
 
     // Update backstresses with a Newton step
     _backstress1_iter -= jacobian_backstress1.inverse() * residual_backstress1;
